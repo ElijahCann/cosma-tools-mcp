@@ -20,7 +20,7 @@ SSH.
 | File | Purpose |
 |---|---|
 | `server.py` | The MCP server — all the tools live here. Runs on COSMA. |
-| `cosma-mcp-setup.sh` | One-time setup: SSH config, deploys `server.py` to COSMA, installs local tooling. Run once. |
+| `setup-cosma-mcp.sh` | One-time setup: SSH config, deploys `server.py` to COSMA, installs local tooling. Run once. |
 | `run-cosma-mcp.sh` | Starts a chat session. Run this every time. |
 | `stop-cosma-mcp.sh` | Stops the local LLM (Ollama), if that's your backend. |
 
@@ -31,8 +31,8 @@ All four files should sit in the same folder before you run setup.
 ## Setup
 
 ```bash
-chmod +x cosma-mcp-setup.sh
-./cosma-mcp-setup.sh
+chmod +x setup-cosma-mcp.sh
+./setup-cosma-mcp.sh
 ```
 
 You'll be asked for:
