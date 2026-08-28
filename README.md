@@ -24,7 +24,7 @@ SSH.
 | `run-cosma-mcp.sh` | Starts a chat session. Run this every time. |
 | `stop-cosma-mcp.sh` | Stops the local LLM (Ollama), if that's your backend. |
 
-All four files should sit in the same folder before you run setup.
+All four files should sit in the same folder before you run setup. The files and setup should be done locally, not on COSMA.
 
 ---
 
