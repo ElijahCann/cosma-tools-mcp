@@ -54,6 +54,11 @@ _PLACEHOLDER_USERNAMES = {
     "current_user", "currentuser", "your_user", "USER", "$user", "none", "null",
 }
 
+_PLACEHOLDER_NODES = {
+        "current_node", "currentnode", "this_node", "thisnode", "this", "here",
+        "local", "localhost", "node", "your_node", "none", "null",
+        }
+
 
 def _run(cmd: list[str], timeout: int = 10, max_lines: int = 100) -> str:
     """
@@ -107,10 +112,11 @@ def _validate_state(state: str) -> str | None:
 
 def _validate_node(node: str) -> str | None:
     """Return the node hostname if it's a safe, non-FQDN identifier, else None."""
-    if node and _NODE_RE.match(node):
-        return node
-    return None
-
+    if not node or not _NODE_RE.match(node):
+        return None
+    if node.strip.lower() in {p.lower() for p in _PLACEHOLDER_NODES}:
+        return None
+    return node
 
 def _limit_lines(text: str, limit: int | None) -> str:
     """Truncate already-formatted output to the first `limit` lines, noting how many were cut."""
@@ -353,21 +359,24 @@ def active_users(node: str | None = None) -> str:
     quota tools, it only reflects whichever physical login node the
     command actually runs on.
 
-    If `node` is omitted, checks the node THIS server is currently
-    running on (call `current_node` first if you need to know which one
-    that is before reporting the answer). If `node` is given (e.g.
-    "login8b"), connects to that specific login node instead over an
-    internal SSH hop — this lets you check who's on a DIFFERENT node than
-    the one this server happens to be running on. Requires that COSMA
-    login nodes can reach each other over SSH without an interactive
-    prompt; if they can't, this returns a clear SSH error rather than
-    hanging (it has its own short timeout).
+    For "this node" / "who's logged in" style questions: OMIT `node` entirely
+    - it automatically checks the node this server is running on. Do not call
+    `current_node` first for this case; it's unnecessary.
+
+    Only pass `node` (e.g. "login8b") when the question names a SPECIFIC other
+    node you want to check instead - this connects to that node over an internal
+    SSH hop. Requires that COSMA login nodes can reach each other over ssh without
+    an interactive prompt; if they can't, this returns a clear SSH error rather 
+    than hanging (it has its own short timeout)
     """
     if node is None:
         return _run(["who"])
     safe_node = _validate_node(node)
     if safe_node is None:
-        return "Error: invalid node name format (expected a short hostname like 'login8b', no dots)"
+        return "Error: invalid or placeholder node name. For 'this node' / 'the\
+                \"current node\"', OMIT the `node` parameter entirely - do not\
+                pass a tool name or generic word. Only pass `node` when the\
+                question names a SPECIFIC other node (e.g. 'login8b')"
     return _run(["ssh", "-o", "BatchMode=yes", "-o", "ConnectTimeout=5", safe_node, "who"], timeout=12)
 
 
